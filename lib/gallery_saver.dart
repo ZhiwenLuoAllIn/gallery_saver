@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:gallery_saver/files.dart';
 import 'package:http/http.dart' as http;
@@ -28,7 +29,7 @@ class GallerySaver {
     if (path.isEmpty) {
       throw ArgumentError(pleaseProvidePath);
     }
-    if (!isVideo(path)) {
+    if (!containVideoSuffix(path)) {
       throw ArgumentError(fileIsNotVideo);
     }
     if (!isLocalFilePath(path)) {
@@ -56,7 +57,7 @@ class GallerySaver {
     if (path.isEmpty) {
       throw ArgumentError(pleaseProvidePath);
     }
-    if (!isImage(path)) {
+    if (!containImageSuffix(path)) {
       throw ArgumentError(fileIsNotImage);
     }
     if (!isLocalFilePath(path)) {
@@ -138,9 +139,12 @@ class GallerySaver {
     if (req.statusCode >= 400) {
       throw HttpException(req.statusCode.toString());
     }
+    final String suffix =
+        getFileSuffix(req.headers['content-type'] ?? 'unknown');
+    debugPrint('File suffix: $suffix');
     var bytes = req.bodyBytes;
     String dir = (await getTemporaryDirectory()).path;
-    File file = new File('$dir/${basename(url)}');
+    File file = new File('$dir/${basenameWithoutExtension(url)}.${suffix}');
     await file.writeAsBytes(bytes);
     print('File size:${await file.length()}');
     print(file.path);
