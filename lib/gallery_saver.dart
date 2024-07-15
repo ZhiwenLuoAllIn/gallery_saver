@@ -75,6 +75,60 @@ class GallerySaver {
     return result;
   }
 
+  ///saves image from provided temp path and optional album name in gallery
+  static Future<bool?> saveNetworkImage(
+    String path, {
+    String? albumName,
+    bool toDcim = false,
+    Map<String, String>? headers,
+  }) async {
+    File? tempFile;
+    if (path.isEmpty) {
+      throw ArgumentError(pleaseProvidePath);
+    }
+
+    tempFile = await _downloadFile(path, headers: headers);
+
+    bool? result = await _channel.invokeMethod(
+      methodSaveImage,
+      <String, dynamic>{
+        'path': tempFile.path,
+        'albumName': albumName,
+        'toDcim': toDcim
+      },
+    );
+
+    tempFile.delete();
+
+    return result;
+  }
+
+  static Future<bool?> saveNetWorkVideo(
+    String path, {
+    String? albumName,
+    bool toDcim = false,
+    Map<String, String>? headers,
+  }) async {
+    File? tempFile;
+    if (path.isEmpty) {
+      throw ArgumentError(pleaseProvidePath);
+    }
+
+    tempFile = await _downloadFile(path, headers: headers);
+
+    bool? result = await _channel.invokeMethod(
+      methodSaveVideo,
+      <String, dynamic>{
+        'path': tempFile.path,
+        'albumName': albumName,
+        'toDcim': toDcim
+      },
+    );
+
+    tempFile.delete();
+    return result;
+  }
+
   static Future<File> _downloadFile(String url,
       {Map<String, String>? headers}) async {
     print(url);
